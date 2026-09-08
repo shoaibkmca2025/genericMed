@@ -1,0 +1,6 @@
+{
+  "name": "genericMed - Generic Medicine Platform",
+  "description": "Online generic medicine price comparison, bioequivalence governance, and multi-tenant pharmacy commerce platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
