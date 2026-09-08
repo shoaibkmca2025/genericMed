@@ -1,4 +1,19 @@
-export type PortalMode = 'admin' | 'customer' | 'store' | 'architecture';
+export type PortalMode = 'admin' | 'customer' | 'store';
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: PortalMode;
+  roleTitle: string;
+  avatarInitials: string;
+  phone?: string;
+  tenantOrStoreName?: string;
+  licenseNumber?: string;
+  npiNumber?: string;
+  address?: string;
+  joinedDate?: string;
+}
 
 export interface BioequivalentPair {
   id: string;

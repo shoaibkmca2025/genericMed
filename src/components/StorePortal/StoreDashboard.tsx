@@ -11,9 +11,20 @@ import {
   ShieldCheck,
   Edit2,
   Save,
+  UserPlus,
+  KeyRound,
 } from 'lucide-react';
+import { UserProfile } from '../../types';
 
-export const StoreDashboard: React.FC = () => {
+interface StoreDashboardProps {
+  currentUser?: UserProfile | null;
+  onOpenAuth?: (tab?: 'login' | 'register') => void;
+}
+
+export const StoreDashboard: React.FC<StoreDashboardProps> = ({
+  currentUser,
+  onOpenAuth,
+}) => {
   const [inventory, setInventory] = useState([
     {
       id: 'INV-101',
@@ -101,17 +112,29 @@ export const StoreDashboard: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-blue-700 uppercase mb-1">
             <Store className="w-4 h-4" />
-            <span>PARTNER PORTAL / TENANT: #TN-B-7740 (MetroGeneric Chemist)</span>
+            <span>
+              PARTNER PORTAL / TENANT: {currentUser?.tenantOrStoreName || '#TN-B-7740 (MetroGeneric Chemist)'}
+              {currentUser?.licenseNumber && ` • Lic: ${currentUser.licenseNumber}`}
+            </span>
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Pharmacy Inventory & Local Dispensing Console
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Manage your store inventory, monitor algorithmic price guardrails, and fulfill patient orders.
+            Logged in as <strong>{currentUser?.name || 'Authorized Pharmacist'}</strong> ({currentUser?.roleTitle || 'Superintendent Pharmacist'}).
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          {onOpenAuth && (
+            <button
+              onClick={() => onOpenAuth('register')}
+              className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-semibold text-xs flex items-center gap-1.5 transition-colors"
+            >
+              <UserPlus className="w-3.5 h-3.5 text-blue-600" />
+              <span>Register New Store / Branch</span>
+            </button>
+          )}
           <span className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200 font-semibold text-xs flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-700" />
             <span>PostgreSQL RLS Partition: Isolated</span>

@@ -14,26 +14,46 @@ import {
   Activity,
   X,
   ArrowRight,
+  User,
+  LogIn,
+  LogOut,
+  UserPlus,
+  KeyRound,
 } from 'lucide-react';
-import { PortalMode } from '../types';
+import { PortalMode, UserProfile } from '../types';
 
 interface HeaderProps {
   currentMode: PortalMode;
   onSelectMode: (mode: PortalMode) => void;
-  onOpenRLSModal: () => void;
+  onOpenRLSInspector?: () => void;
+  onOpenRLSModal?: () => void;
   onOpenCommandPalette: () => void;
-  alertCount: number;
+  onRunIntegrityScan?: () => void;
+  alertCount?: number;
+  anomalyCount?: number;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: (tab?: 'login' | 'register') => void;
+  onLogout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentMode,
   onSelectMode,
+  onOpenRLSInspector,
   onOpenRLSModal,
   onOpenCommandPalette,
+  onRunIntegrityScan,
   alertCount,
+  anomalyCount,
+  currentUser,
+  onOpenAuth,
+  onLogout,
 }) => {
   const [isPortalDropdownOpen, setIsPortalDropdownOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const handleOpenRLS = onOpenRLSInspector || onOpenRLSModal;
+  const effectiveAlertCount = alertCount ?? anomalyCount ?? 0;
 
   const getPortalLabel = () => {
     switch (currentMode) {
@@ -43,8 +63,6 @@ export const Header: React.FC<HeaderProps> = ({
         return 'Customer Marketplace';
       case 'store':
         return 'Store Partner Portal';
-      case 'architecture':
-        return 'System Architecture';
     }
   };
 
@@ -154,24 +172,6 @@ export const Header: React.FC<HeaderProps> = ({
                       <div className="text-[11px] text-slate-500">Catalog Inventory & Dispatch Orders Queue</div>
                     </div>
                   </button>
-
-                  <div className="border-t border-slate-100 my-1" />
-
-                  <button
-                    onClick={() => {
-                      onSelectMode('architecture');
-                      setIsPortalDropdownOpen(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left flex items-start gap-2.5 hover:bg-slate-50 text-xs transition-colors ${
-                      currentMode === 'architecture' ? 'bg-emerald-50/60 font-semibold text-[#0f4c5c]' : 'text-slate-700'
-                    }`}
-                  >
-                    <Layers className="w-4 h-4 mt-0.5 text-purple-600 shrink-0" />
-                    <div>
-                      <div className="font-medium text-slate-900">System Architecture Diagram Explorer</div>
-                      <div className="text-[11px] text-slate-500">Inspect Multi-Tenant Layers, IAM & Data Flows</div>
-                    </div>
-                  </button>
                 </div>
               </>
             )}
@@ -179,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Multi-Tenant Row-Level Security Badge (as seen on Image 1) */}
           <button
-            onClick={onOpenRLSModal}
+            onClick={handleOpenRLS}
             className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors shadow-2xs"
             title="Inspect Row-Level Security Isolation"
           >
@@ -221,9 +221,9 @@ export const Header: React.FC<HeaderProps> = ({
               title="View Alerts & Telemetry"
             >
               <Bell className="w-4 h-4" />
-              {alertCount > 0 && (
+              {effectiveAlertCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-rose-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center">
-                  {alertCount}
+                  {effectiveAlertCount}
                 </span>
               )}
             </button>
@@ -292,15 +292,137 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* User Profile */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-            <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shadow-xs border border-emerald-300">
-              SC
-            </div>
-            <div className="hidden md:block text-left">
-              <div className="text-xs font-bold text-slate-800 leading-tight">Dr. Sarah Chen</div>
-              <div className="text-[10px] text-slate-500 leading-tight">Chief Regulatory Officer</div>
-            </div>
+          {/* User Profile / Auth Area */}
+          <div className="relative pl-2 border-l border-slate-200">
+            {currentUser ? (
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 transition-colors text-left"
+                title="Account & Security Credentials"
+              >
+                <div
+                  className={`w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shadow-xs border ${
+                    currentUser.role === 'admin'
+                      ? 'bg-emerald-700 border-emerald-300'
+                      : currentUser.role === 'store'
+                      ? 'bg-blue-700 border-blue-300'
+                      : 'bg-purple-700 border-purple-300'
+                  }`}
+                >
+                  {currentUser.avatarInitials}
+                </div>
+                <div className="hidden md:block text-left">
+                  <div className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[130px]">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-[10px] text-slate-500 leading-tight truncate max-w-[130px]">
+                    {currentUser.roleTitle}
+                  </div>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onOpenAuth?.('login')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#0f4c5c] hover:bg-emerald-50 border border-emerald-300/60 transition-colors flex items-center gap-1.5"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </button>
+                <button
+                  onClick={() => onOpenAuth?.('register')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#0f4c5c] hover:bg-[#0c3c49] text-white shadow-xs transition-colors flex items-center gap-1.5"
+                >
+                  <UserPlus className="w-3.5 h-3.5 text-emerald-300" />
+                  <span className="hidden sm:inline">Register</span>
+                </button>
+              </div>
+            )}
+
+            {/* Profile Dropdown Menu */}
+            {showUserMenu && currentUser && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowUserMenu(false)}
+                />
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <div className="p-4 bg-gradient-to-r from-slate-900 to-[#0f4c5c] text-white">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/30 border border-emerald-300/40 text-emerald-200 font-bold flex items-center justify-center text-sm">
+                        {currentUser.avatarInitials}
+                      </div>
+                      <div className="overflow-hidden">
+                        <div className="font-bold text-sm text-white truncate">{currentUser.name}</div>
+                        <div className="text-[11px] text-emerald-300 truncate">{currentUser.email}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
+                      <span className="text-slate-300">ACTIVE ROLE:</span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold uppercase">
+                        {currentUser.role}
+                      </span>
+                    </div>
+
+                    {currentUser.licenseNumber && (
+                      <div className="mt-1 text-[10px] font-mono text-slate-300">
+                        License: <span className="text-white font-semibold">{currentUser.licenseNumber}</span>
+                      </div>
+                    )}
+                    {currentUser.npiNumber && (
+                      <div className="mt-1 text-[10px] font-mono text-slate-300">
+                        Accreditation: <span className="text-white font-semibold">{currentUser.npiNumber}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-2 space-y-1 text-xs">
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        onOpenAuth?.('login');
+                      }}
+                      className="w-full px-3 py-2 text-left rounded-lg hover:bg-slate-100 flex items-center justify-between text-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <KeyRound className="w-4 h-4 text-[#0f4c5c]" />
+                        <span>Switch Persona / Login</span>
+                      </div>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        onOpenAuth?.('register');
+                      }}
+                      className="w-full px-3 py-2 text-left rounded-lg hover:bg-slate-100 flex items-center justify-between text-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <UserPlus className="w-4 h-4 text-emerald-700" />
+                        <span>Register Another Account</span>
+                      </div>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                    </button>
+
+                    <div className="border-t border-slate-100 my-1" />
+
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        if (onLogout) onLogout();
+                      }}
+                      className="w-full px-3 py-2 text-left rounded-lg hover:bg-rose-50 text-rose-600 font-semibold flex items-center gap-2 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4 text-rose-500" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

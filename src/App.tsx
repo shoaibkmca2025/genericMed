@@ -10,7 +10,6 @@ import { TenantManagementView } from './components/AdminPortal/TenantManagementV
 import { CustomerMarketplace } from './components/CustomerPortal/CustomerMarketplace';
 import { CartModal, CartItem } from './components/CustomerPortal/CartModal';
 import { StoreDashboard } from './components/StorePortal/StoreDashboard';
-import { ArchitectureView } from './components/ArchitecturePortal/ArchitectureView';
 
 // Modals
 import { BioStudyModal } from './components/Modals/BioStudyModal';
@@ -19,6 +18,7 @@ import { CommandPalette } from './components/Modals/CommandPalette';
 import { StoreDocsModal } from './components/Modals/StoreDocsModal';
 import { PharmacopeiaModal } from './components/Modals/PharmacopeiaModal';
 import { IntegrityScanModal } from './components/Modals/IntegrityScanModal';
+import { AuthScreen } from './components/Auth/AuthScreen';
 
 // Mock Data & Types
 import {
@@ -28,6 +28,7 @@ import {
   initialAuditLogs,
   initialCustomerMedicines,
   initialCustomerOrders,
+  DEFAULT_USERS,
 } from './data/mockData';
 import {
   BioequivalentPair,
@@ -36,10 +37,12 @@ import {
   AuditLogItem,
   CustomerMedicine,
   CustomerListing,
+  PortalMode,
+  UserProfile,
 } from './types';
 
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<'admin' | 'customer' | 'store' | 'architecture'>('admin');
+  const [currentMode, setCurrentMode] = useState<PortalMode>('admin');
   const [adminTab, setAdminTab] = useState<AdminTab>('catalog');
 
   // Application Data States
@@ -70,9 +73,32 @@ export default function App() {
   // Notification Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(DEFAULT_USERS.admin);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authInitialTab, setAuthInitialTab] = useState<'login' | 'register'>('login');
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleSuccessLogin = (user: UserProfile) => {
+    setCurrentUser(user);
+    setCurrentMode(user.role);
+    showToast(`Logged in as ${user.name} (${user.roleTitle})`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    showToast('Logged out of session. Please sign in to continue.');
+    setAuthInitialTab('login');
+    setIsAuthOpen(true);
+  };
+
+  const handleOpenAuth = (tab: 'login' | 'register' = 'login') => {
+    setAuthInitialTab(tab);
+    setIsAuthOpen(true);
   };
 
   // Keyboard shortcut Cmd+K / Ctrl+K
@@ -263,6 +289,9 @@ export default function App() {
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onRunIntegrityScan={() => setIsIntegrityScanOpen(true)}
         anomalyCount={activeAnomaliesCount}
+        currentUser={currentUser}
+        onOpenAuth={handleOpenAuth}
+        onLogout={handleLogout}
       />
 
       {/* Main App Container */}
@@ -430,12 +459,17 @@ export default function App() {
                 onAddToCart={handleAddToCart}
                 cartCount={cartItems.reduce((acc, it) => acc + it.quantity, 0)}
                 onOpenCart={() => setIsCartOpen(true)}
+                currentUser={currentUser}
+                onOpenAuth={handleOpenAuth}
               />
             )}
 
-            {currentMode === 'store' && <StoreDashboard />}
-
-            {currentMode === 'architecture' && <ArchitectureView />}
+            {currentMode === 'store' && (
+              <StoreDashboard
+                currentUser={currentUser}
+                onOpenAuth={handleOpenAuth}
+              />
+            )}
           </div>
         </main>
       </div>
@@ -467,6 +501,7 @@ export default function App() {
           setSelectedBioStudyPair(p);
         }}
         onNavigateMode={(mode) => setCurrentMode(mode)}
+        onOpenAuth={handleOpenAuth}
       />
 
       <PharmacopeiaModal isOpen={isPharmacopeiaOpen} onClose={() => setIsPharmacopeiaOpen(false)} />
@@ -480,6 +515,16 @@ export default function App() {
         onUpdateQuantity={handleUpdateCartQuantity}
         onRemoveItem={handleRemoveCartItem}
         onCheckout={handleCheckout}
+      />
+
+      {/* Authentication: Login & Registration Screen */}
+      <AuthScreen
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onSuccessLogin={handleSuccessLogin}
+        initialMode={authInitialTab}
+        initialRole={currentMode}
+        isModal={true}
       />
     </div>
   );

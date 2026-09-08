@@ -5,6 +5,7 @@ import {
   AuditLogItem,
   CustomerMedicine,
   CustomerOrder,
+  UserProfile,
 } from '../types';
 
 export const INITIAL_BIOEQUIVALENT_PAIRS: BioequivalentPair[] = [
@@ -625,4 +626,43 @@ export const initialStores = INITIAL_STORE_ONBOARDING;
 export const initialAuditLogs = INITIAL_AUDIT_LOGS;
 export const initialCustomerMedicines = CUSTOMER_MEDICINES;
 export const initialCustomerOrders = INITIAL_CUSTOMER_ORDERS;
+
+export const DEFAULT_USERS: Record<string, UserProfile> = {
+  admin: {
+    id: 'USR-ADM-001',
+    name: 'Dr. Sarah Chen',
+    email: 'sarah.chen@fda-board.genericmed.gov',
+    role: 'admin',
+    roleTitle: 'Chief Regulatory Officer & Board Chair',
+    avatarInitials: 'SC',
+    phone: '+1 (312) 555-0192',
+    npiNumber: 'NPI-8829103948',
+    joinedDate: 'Jan 2023',
+  },
+  store: {
+    id: 'USR-STR-042',
+    name: 'Marcus Vance, PharmD',
+    email: 'marcus.vance@metrogeneric.com',
+    role: 'store',
+    roleTitle: 'Superintendent Pharmacist & Store Owner',
+    avatarInitials: 'MV',
+    phone: '+1 (312) 555-8841',
+    tenantOrStoreName: 'MetroGeneric Chemist (#TN-B-7740)',
+    licenseNumber: 'PH-2024-88419',
+    address: '482 Lincoln Ave, Chicago, IL 60614',
+    joinedDate: 'Oct 2023',
+  },
+  customer: {
+    id: 'USR-CUST-812',
+    name: 'David Miller',
+    email: 'david.miller@gmail.com',
+    role: 'customer',
+    roleTitle: 'Verified Patient & Prescriptions Saver',
+    avatarInitials: 'DM',
+    phone: '+1 (312) 555-4309',
+    address: '742 Evergreen Terrace, Apt 4B, Chicago, IL 60611',
+    joinedDate: 'Mar 2024',
+  },
+};
+
 

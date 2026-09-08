@@ -15,14 +15,18 @@ import {
   Check,
   Percent,
   Info,
+  User,
+  LogIn,
 } from 'lucide-react';
-import { CustomerMedicine, CustomerListing } from '../../types';
+import { CustomerMedicine, CustomerListing, UserProfile } from '../../types';
 
 interface CustomerMarketplaceProps {
   medicines: CustomerMedicine[];
   onAddToCart: (medicine: CustomerMedicine, listing: CustomerListing) => void;
   cartCount: number;
   onOpenCart: () => void;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: (tab?: 'login' | 'register') => void;
 }
 
 export const CustomerMarketplace: React.FC<CustomerMarketplaceProps> = ({
@@ -30,6 +34,8 @@ export const CustomerMarketplace: React.FC<CustomerMarketplaceProps> = ({
   onAddToCart,
   cartCount,
   onOpenCart,
+  currentUser,
+  onOpenAuth,
 }) => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -101,6 +107,49 @@ export const CustomerMarketplace: React.FC<CustomerMarketplaceProps> = ({
                 }}
               />
             </label>
+          </div>
+
+          {/* Account / Delivery Address Strip */}
+          <div className="pt-1 flex flex-wrap items-center justify-between text-[11px] text-slate-200 gap-2 border-t border-white/10 mt-3">
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>
+                  Delivering to: <strong className="text-white">{currentUser.name}</strong> •{' '}
+                  <span className="text-emerald-200">{currentUser.address || '742 Evergreen Terrace, Chicago, IL'}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth?.('login')}
+                  className="text-emerald-300 hover:text-white underline font-semibold ml-1 cursor-pointer"
+                >
+                  Switch Persona
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-emerald-300" />
+                <span>Save prescription history & unlock 1-click refills:</span>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth?.('login')}
+                  className="text-emerald-300 hover:text-white font-bold underline cursor-pointer"
+                >
+                  Sign In
+                </button>
+                <span>or</span>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth?.('register')}
+                  className="text-emerald-300 hover:text-white font-bold underline cursor-pointer"
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
+            <div className="text-slate-300 font-mono text-[10px]">
+              Guaranteed Delivery within 45 Mins
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, Pill, Store, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
-import { BioequivalentPair, PriceAnomalyAlert, StoreOnboardingItem } from '../../types';
+import { Search, X, Pill, Store, AlertTriangle, ArrowRight, ShieldCheck, LogIn, UserPlus } from 'lucide-react';
+import { BioequivalentPair, PriceAnomalyAlert, StoreOnboardingItem, PortalMode } from '../../types';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -9,7 +9,8 @@ interface CommandPaletteProps {
   anomalies: PriceAnomalyAlert[];
   stores: StoreOnboardingItem[];
   onSelectPair: (pair: BioequivalentPair) => void;
-  onNavigateMode: (mode: 'admin' | 'customer' | 'store' | 'architecture') => void;
+  onNavigateMode: (mode: PortalMode) => void;
+  onOpenAuth?: (tab?: 'login' | 'register') => void;
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
@@ -20,6 +21,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   stores,
   onSelectPair,
   onNavigateMode,
+  onOpenAuth,
 }) => {
   const [query, setQuery] = useState('');
 
@@ -119,16 +121,36 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 <span>Pharmacy Partner Portal</span>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
-              <button
-                onClick={() => {
-                  onNavigateMode('architecture');
-                  onClose();
-                }}
-                className="p-2 rounded-lg text-left hover:bg-slate-100 flex items-center justify-between text-slate-700"
-              >
-                <span>System Architecture Explorer</span>
-                <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-              </button>
+              {onOpenAuth && (
+                <>
+                  <button
+                    onClick={() => {
+                      onOpenAuth('login');
+                      onClose();
+                    }}
+                    className="p-2 rounded-lg text-left hover:bg-emerald-50 text-[#0f4c5c] font-semibold flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <LogIn className="w-3.5 h-3.5" />
+                      <span>Sign In / Switch Persona</span>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-emerald-600" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      onOpenAuth('register');
+                      onClose();
+                    }}
+                    className="p-2 rounded-lg text-left hover:bg-emerald-50 text-emerald-800 font-semibold flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Register New User / Pharmacy</span>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-emerald-600" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
